@@ -6,41 +6,65 @@ const list = document.getElementById("bookmarkList")
 
 let bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || []
 
+let editIndex = null
+
 function save() {
     localStorage.setItem("bookmarks", JSON.stringify(bookmarks))
 }
 
 function render() {
     list.innerHTML = ""
+
     bookmarks.forEach((link, index) => {
         const li = document.createElement("li")
         const a = document.createElement("a")
         const btn = document.createElement("button")
-        btn.classList.add("delete")
-        btn.textContent = "X"
+        const editBtn = document.createElement("button")
+
         a.textContent = link
         a.href = link
+        a.target = "_blank"
 
-        btn.addEventListener("click", ()=>{
+        btn.textContent = "X"
+        btn.classList.add("delete")
+
+        editBtn.textContent = "Редагувати"
+
+        btn.addEventListener("click", () => {
             bookmarks.splice(index, 1)
             save()
             render()
         })
 
-        li.append(a)
-        li.append(btn)
+        editBtn.addEventListener("click", () => {
+            input.value = link
+            editIndex = index
+            addBtn.textContent = "Зберегти"
+        })
+
+        li.append(a, editBtn, btn)
         list.append(li)
-    });
+    })
 }
 
 addBtn.addEventListener("click", () => {
     const value = input.value.trim()
+
     if (!value) {
         return
     }
-    bookmarks.push(value)
-    save(value)
+
+    if (editIndex !== null) {
+        bookmarks[editIndex] = value
+        editIndex = null
+        addBtn.textContent = "Додати"
+    } else {
+        bookmarks.push(value)
+    }
+
+    save()
     render()
+
     input.value = ""
 })
 
